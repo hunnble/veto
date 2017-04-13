@@ -1,8 +1,8 @@
 var webpack = require('webpack');
 var glob = require('glob');
 var path = require('path');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 var entries = getEntry('./src/pages/**/*.js');
 var chunks = Object.keys(entries);
@@ -13,12 +13,17 @@ module.exports = {
 
   output: {
     filename: '[name].[hash].js',
-    path: path.resolve(__dirname, '/build'),
+    path: path.resolve(__dirname, 'build'),
     publicPath: '/build/'
   },
 
   resolve: {
-    extensions: ['.js', '.less', '.vue']
+    extensions: ['.js', '.less', '.vue', '.json'],
+    alias: {
+      'src': path.resolve(__dirname, '/src'),
+      'assets': path.resolve(__dirname, '/src/assets'),
+      'components': path.resolve(__dirname, '/src/components')
+    }
   },
 
   module: {
@@ -27,7 +32,7 @@ module.exports = {
         test: /\.less$/,
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
-          use: 'css-loader!less-loader'
+          use: ['css-loader', 'less-loader']
         })
       },
       {
@@ -35,7 +40,8 @@ module.exports = {
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
           use: 'css-loader'
-        })
+        }),
+        exclude: /node_modules/
       },
       {
         test: /\.vue$/,
@@ -52,6 +58,10 @@ module.exports = {
         exclude: /node_modules/
       },
       {
+        test: /\.(eot|svg|ttf|woff2?)$/,
+        loader: 'file-loader'
+      },
+      {
         test: /\.(png|jpe?g|gif|svg)$/,
         loader: 'file-loader',
         options: {
@@ -64,18 +74,19 @@ module.exports = {
 
   plugins: [
     new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendors',
+      name: 'common',
       chunks: chunks,
       minChunks: chunks.length
     }),
-    new ExtractTextPlugin('[name].css')
+    new ExtractTextPlugin('[name].css'),
+    new ExtractTextPlugin('[name].less')
   ],
 
-  devServer: {
-    hot: true,
-    contentBase: path.resolve(__dirname, 'dist'),
-    publicPath: '/'
-  }
+  // devServer: {
+  //   hot: true,
+  //   contentBase: path.resolve(__dirname, 'dist'),
+  //   publicPath: '/'
+  // }
 };
 
 if (prod) {
@@ -105,7 +116,7 @@ if (prod) {
 var pages = getEntry('./src/pages/**/*.html');
 for (var page in pages) {
   var conf = {
-    filename: prod ? path.resolve(__dianame, 'dist') : page + '.html',
+    filename: prod ? path.resolve(__dianame, 'build') : page + '.html',
     template: pages[page],
     inject: true,
     minify: {
@@ -114,8 +125,10 @@ for (var page in pages) {
     }
   };
 
+  console.log(page, module.exports.entry);
+
   if (page in module.exports.entry) {
-    conf.chunks = ['vendors', page],
+    conf.chunks = ['common', page],
     conf.hash = false
   }
 
