@@ -13,15 +13,15 @@ module.exports = {
 
   output: {
     filename: '[name].[hash].js',
-    path: path.resolve(__dirname, 'static'),
-    // publicPath: '/static/'
+    path: path.resolve(__dirname, 'static')
   },
 
   resolve: {
     extensions: ['.js', '.less', '.vue', '.json'],
     alias: {
-      'assets': path.resolve(__dirname, '/src/assets'),
-      'components': path.resolve(__dirname, '/src/components')
+      '~assets': path.resolve(__dirname, 'src/assets'),
+      '~styles': path.resolve(__dirname, 'src/assets/styles'),
+      '~components': path.resolve(__dirname, 'src/components')
     }
   },
 
@@ -31,25 +31,27 @@ module.exports = {
         test: /\.less$/,
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
-          use: ['css-loader', 'less-loader']
+          use: ['css-loader', 'less-loader'],
+          publicPath: '../'
         })
       },
       {
         test: /\.css$/,
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
-          use: 'css-loader'
+          use: 'css-loader',
+          publicPath: '../'
         }),
         exclude: /node_modules/
       },
       {
         test: /\.vue$/,
-        use: 'vue-loader',
-        // options: {
-        //   loaders: {
-        //     less: 'vue-style-loader!css-loader!less-loader'
-        //   }
-        // }
+        loader: 'vue-loader',
+        options: {
+          loaders: {
+            less: 'vue-style-loader!css-loader!less-loader'
+          }
+        }
       },
       {
         test: /\.js$/,
@@ -65,7 +67,8 @@ module.exports = {
         loader: 'file-loader',
         options: {
           limit: 8192,
-          name: '[name].[ext]?[hash]'
+          name: '[name].[ext]?[hash]',
+          useRelativePath: prod
         }
       }
     ]
@@ -78,14 +81,12 @@ module.exports = {
       minChunks: chunks.length
     }),
     new ExtractTextPlugin('[name].css'),
-    new ExtractTextPlugin('[name].less'),
     new webpack.HotModuleReplacementPlugin()
   ],
 
   devServer: {
     hot: true,
     contentBase: path.resolve(__dirname, 'static'),
-    // publicPath: '/static/',
     overlay: true
   }
 };
@@ -93,12 +94,6 @@ module.exports = {
 if (prod) {
   module.exports.devtool = '#source-map';
   module.exports.plugins = (module.exports.plugins || []).concat([
-    new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: 'production'
-      }
-    }),
-
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: true,
       compress: {
@@ -107,7 +102,7 @@ if (prod) {
     }),
 
     new webpack.LoaderOptionsPlugin({
-      minimize: tru
+      minimize: true
     })
   ])
 } else {
@@ -120,6 +115,7 @@ for (var entry in entries) {
     inject: true,
     chunks: ['common', entry],
     hash: false,
+    template: path.resolve(__dirname, 'template.html'),
     minify: {
       removeComments: true,
       collapseWhitespace: false
@@ -127,7 +123,12 @@ for (var entry in entries) {
   };
   var pageConfig = require('./src/pages/' + entry.split('/')[0] + '/config.js');
   if (pageConfig) {
-    conf.title = pageConfig.title;
+    if (pageConfig.template) {
+      conf.template = pageConfig.template;
+    }
+    if (pageConfig.title) {
+      conf.title = pageConfig.title;
+    }
   }
 
   module.exports.plugins.push(new HtmlWebpackPlugin(conf));

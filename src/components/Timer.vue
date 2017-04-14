@@ -34,7 +34,7 @@
   }
 </script>
 
-<style>
+<style scope>
   .time {
     font-size: 30px;
   }

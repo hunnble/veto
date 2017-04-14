@@ -1,12 +1,14 @@
 <template>
-  <section>
-    <h2>Hello {{ name }}</h2>
+  <section class="example-wrapper">
+    <div class="example-img"></div>
+    <h2>Veto</h2>
     <timer></timer>
   </section>
 </template>
 
 <script>
-  import Timer from '../../components/Timer';
+  import '~styles/base';
+  import Timer from '~components/Timer';
   export default {
     components: {
       Timer
@@ -18,9 +20,3 @@
     }
   }
 </script>
-
-<style scope>
-  div {
-    color: #451235;
-  }
-</style>
