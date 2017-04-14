@@ -1,8 +1,9 @@
 <template>
   <section class="time">
-    <span>{{ hour < 10 ? '0' : '' }}{{ hour }}</span>:
-    <span>{{ minute < 10 ? '0' : '' }}{{ minute }}</span>:
-    <span>{{ second < 10 ? '0' : '' }}{{ second }}</span>
+    <span v-if="desc">{{ desc }}</span>
+    <span v-if="hour > 0">{{ hour }}h</span>
+    <span v-if="minute > 0">{{ minute }}min</span>
+    <span>{{ second }}s</span>
   </section>
 </template>
 
@@ -30,12 +31,15 @@
           }
         }
       }
-    }
+    },
+    props: ['desc']
   }
 </script>
 
 <style scope>
-  .time {
-    font-size: 30px;
+  span {
+    display: inline-block;
+    height: 30px;
+    line-height: 30px;
   }
 </style>

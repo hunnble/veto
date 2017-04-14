@@ -2,7 +2,8 @@
   <section class="example-wrapper">
     <div class="example-img"></div>
     <h2>Veto</h2>
-    <timer></timer>
+    <a href="/about">about</a>
+    <timer desc="+"></timer>
   </section>
 </template>
 
@@ -20,3 +21,9 @@
     }
   }
 </script>
+
+<style scope>
+  h2, section {
+    font-weight: 300;
+  }
+</style>
