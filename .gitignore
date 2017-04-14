@@ -38,3 +38,5 @@ jspm_packages
 
 # Build
 build/
+dist/
+static/

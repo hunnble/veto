@@ -4,7 +4,7 @@ var path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-var entries = getEntry('./src/pages/**/*.js');
+var entries = getEntry('./src/pages/**/index.js');
 var chunks = Object.keys(entries);
 var prod = process.env.NODE_ENV === 'production';
 
@@ -13,14 +13,13 @@ module.exports = {
 
   output: {
     filename: '[name].[hash].js',
-    path: path.resolve(__dirname, 'build'),
-    publicPath: '/build/'
+    path: path.resolve(__dirname, 'static'),
+    // publicPath: '/static/'
   },
 
   resolve: {
     extensions: ['.js', '.less', '.vue', '.json'],
     alias: {
-      'src': path.resolve(__dirname, '/src'),
       'assets': path.resolve(__dirname, '/src/assets'),
       'components': path.resolve(__dirname, '/src/components')
     }
@@ -82,11 +81,12 @@ module.exports = {
     new ExtractTextPlugin('[name].less')
   ],
 
-  // devServer: {
-  //   hot: true,
-  //   contentBase: path.resolve(__dirname, 'dist'),
-  //   publicPath: '/'
-  // }
+  devServer: {
+    hot: true,
+    contentBase: path.resolve(__dirname, 'static'),
+    // publicPath: '/static/',
+    overlay: true
+  }
 };
 
 if (prod) {
@@ -113,23 +113,20 @@ if (prod) {
   module.exports.devtool = '#eval-source-map'
 }
 
-var pages = getEntry('./src/pages/**/*.html');
-for (var page in pages) {
+for (var entry in entries) {
   var conf = {
-    filename: prod ? path.resolve(__dianame, 'build') : page + '.html',
-    template: pages[page],
+    filename: entry + '.html',
     inject: true,
+    chunks: ['common', entry],
+    hash: false,
     minify: {
       removeComments: true,
       collapseWhitespace: false
     }
   };
-
-  console.log(page, module.exports.entry);
-
-  if (page in module.exports.entry) {
-    conf.chunks = ['common', page],
-    conf.hash = false
+  var pageConfig = require('./src/pages/' + entry.split('/')[0] + '/config.js');
+  if (pageConfig) {
+    conf.title = pageConfig.title;
   }
 
   module.exports.plugins.push(new HtmlWebpackPlugin(conf));
