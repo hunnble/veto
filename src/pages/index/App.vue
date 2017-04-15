@@ -4,15 +4,18 @@
     <h2>Veto</h2>
     <a href="/about">about</a>
     <timer desc="+"></timer>
+    <info></info>
   </section>
 </template>
 
 <script>
   import '~styles/base';
   import Timer from '~components/Timer';
+  import Info from '~components/Info';
   export default {
     components: {
-      Timer
+      Timer,
+      Info
     },
     data() {
       return {

@@ -3,10 +3,12 @@ var glob = require('glob');
 var path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
-
+var includePaths = [path.resolve(__dirname, 'src')];
 var entries = getEntry('./src/pages/**/index.js');
 var chunks = Object.keys(entries);
 var prod = process.env.NODE_ENV === 'production';
+var mockConf = require('./mock/config.js');
+var mockPort = mockConf.port || 3000;
 
 module.exports = {
   entry: entries,
@@ -33,7 +35,8 @@ module.exports = {
           fallback: 'style-loader',
           use: ['css-loader', 'less-loader'],
           publicPath: '../'
-        })
+        }),
+        include: includePaths
       },
       {
         test: /\.css$/,
@@ -42,7 +45,7 @@ module.exports = {
           use: 'css-loader',
           publicPath: '../'
         }),
-        exclude: /node_modules/
+        include: includePaths
       },
       {
         test: /\.vue$/,
@@ -51,16 +54,18 @@ module.exports = {
           loaders: {
             less: 'vue-style-loader!css-loader!less-loader'
           }
-        }
+        },
+        include: includePaths
       },
       {
         test: /\.js$/,
         use: 'babel-loader',
-        exclude: /node_modules/
+        include: includePaths
       },
       {
         test: /\.(eot|svg|ttf|woff2?)$/,
-        loader: 'file-loader'
+        loader: 'file-loader',
+        include: includePaths
       },
       {
         test: /\.(png|jpe?g|gif|svg)$/,
@@ -69,7 +74,8 @@ module.exports = {
           limit: 8192,
           name: '[name].[ext]?[hash]',
           useRelativePath: prod
-        }
+        },
+        include: includePaths
       }
     ]
   },
@@ -87,7 +93,13 @@ module.exports = {
   devServer: {
     hot: true,
     contentBase: path.resolve(__dirname, 'static'),
-    overlay: true
+    overlay: true,
+    proxy: {
+      '/api/*': {
+        target: 'http://127.0.0.1:' + mockPort,
+        secure: false
+      }
+    }
   }
 };
 
