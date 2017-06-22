@@ -87,7 +87,8 @@ module.exports = {
       minChunks: chunks.length
     }),
     new ExtractTextPlugin('[name].css'),
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.optimize.ModuleConcatenationPlugin()
   ],
 
   devServer: {
